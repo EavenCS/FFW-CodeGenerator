@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einsatzbericht Generator</title>
+    <!-- jsPDF Bibliothek -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas für bessere PDF-Erstellung -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Font Awesome für das GitHub-Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .form-section label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-section input, .form-section select, .form-section textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-section button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-section button:hover {
+            background-color: #45a049;
+        }
+        .report-section {
+            margin-top: 20px;
+        }
+        .report-entry {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        .report-entry h3 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .report-entry p {
+            margin: 5px 0;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+        }
+        footer a {
+            color: #333;
+            text-decoration: none;
+            font-size: 24px;
+        }
+        footer a:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Einsatzbericht Generator</h1>
+
+<div class="form-section">
+    <label for="einsatzArt">Einsatzart:</label>
+    <select id="einsatzArt">
+        <option value="Hilfeleistung H0">Hilfeleistung H0</option>
+        <option value="Brandeinsatz B1">Brandeinsatz B1</option>
+        <option value="Brandeinsatz B2">Brandeinsatz B2</option>
+    </select>
+
+    <label for="einsatzDatum">Datum:</label>
+    <input type="date" id="einsatzDatum">
+
+    <label for="einsatzStartzeit">Startzeit:</label>
+    <input type="time" id="einsatzStartzeit">
+
+    <label for="einsatzEndzeit">Endzeit:</label>
+    <input type="time" id="einsatzEndzeit">
+
+    <label for="einsatzLeiter">Einsatzleiter:</label>
+    <input type="text" id="einsatzLeiter">
+
+    <label for="einsatzBeschreibung">Beschreibung:</label>
+    <textarea id="einsatzBeschreibung" rows="4"></textarea>
+
+    <label for="einsatzFahrzeuge">Einsatzfahrzeuge (mehrere auswählen):</label>
+    <select id="einsatzFahrzeuge" multiple>
+        <option value="ELW 1">ELW 1</option>
+        <option value="LF 20/16">LF 20/16</option>
+        <option value="TLF 3000">TLF 3000</option>
+        <option value="TSF-W">TSF-W</option>
+    </select>
+
+    <label for="einsatzKraefte">Anzahl der Einsatzkräfte:</label>
+    <input type="number" id="einsatzKraefte" min="1">
+
+    <h3>Weitere Gewerke:</h3>
+    <label for="gewerkeName">Gewerkename:</label>
+    <input type="text" id="gewerkeName">
+
+    <label for="gewerkeKraefte">Anzahl der Einsatzkräfte des Gewerkes:</label>
+    <input type="number" id="gewerkeKraefte" min="0">
+
+    <label for="gewerkeSonderinfo">Sonderinformationen:</label>
+    <textarea id="gewerkeSonderinfo" rows="2"></textarea>
+
+    <button type="button" onclick="addGewerk()">Gewerk hinzufügen</button>
+
+    <ul id="gewerkeList">
+        <!-- Hinzugefügte Gewerke werden hier angezeigt -->
+    </ul>
+
+    <button type="button" onclick="addEinsatz()">Einsatz hinzufügen</button>
+</div>
+
+<h2>Generierter Einsatzbericht</h2>
+<div class="report-section" id="reportSection">
+    <!-- Hier werden die Einsatzberichte angezeigt -->
+</div>
+
+<button onclick="exportPDF()">Bericht als PDF exportieren</button>
+
+<footer>
+    <p>Besuche unser GitHub Repository</p>
+    <a href="https://github.com/DEIN_GITHUB_LINK" target="_blank">
+        <i class="fab fa-github"></i>
+    </a>
+</footer>
+
+<script>
+    let gewerke = [];
+
+    function addGewerk() {
+        const gewerkName = document.getElementById('gewerkeName').value;
+        const gewerkKraefte = document.getElementById('gewerkeKraefte').value;
+        const gewerkSonderinfo = document.getElementById('gewerkeSonderinfo').value;
+
+        if (gewerkName && gewerkKraefte) {
+            gewerke.push({ name: gewerkName, kraefte: gewerkKraefte, sonderinfo: gewerkSonderinfo });
+
+            const gewerkeList = document.getElementById('gewerkeList');
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<strong>${gewerkName}</strong> - Stärke: 1:${gewerkKraefte}${gewerkSonderinfo ? '<br><em>Sonderinformationen:</em> ' + gewerkSonderinfo : ''}`;
+            gewerkeList.appendChild(listItem);
+
+            // Felder zurücksetzen
+            document.getElementById('gewerkeName').value = '';
+            document.getElementById('gewerkeKraefte').value = '';
+            document.getElementById('gewerkeSonderinfo').value = '';
+        }
+    }
+
+    function addEinsatz() {
+        const einsatzArt = document.getElementById('einsatzArt').value;
+        const einsatzDatum = document.getElementById('einsatzDatum').value;
+        const einsatzStartzeit = document.getElementById('einsatzStartzeit').value;
+        const einsatzEndzeit = document.getElementById('einsatzEndzeit').value;
+        const einsatzLeiter = document.getElementById('einsatzLeiter').value;
+        const einsatzBeschreibung = document.getElementById('einsatzBeschreibung').value;
+        const einsatzFahrzeuge = Array.from(document.getElementById('einsatzFahrzeuge').selectedOptions).map(option => option.value);
+        const einsatzKraefte = document.getElementById('einsatzKraefte').value;
+
+        const reportSection = document.getElementById('reportSection');
+        const entry = document.createElement('div');
+        entry.className = 'report-entry';
+
+        let gewerkeText = '';
+        if (gewerke.length > 0) {
+            gewerkeText = '<strong>Weitere Gewerke:</strong><ul>';
+            gewerke.forEach(g => {
+                gewerkeText += `<li>${g.name} - Stärke: 1:${g.kraefte}${g.sonderinfo ? '<br><em>Sonderinformationen:</em> ' + g.sonderinfo : ''}</li>`;
+            });
+            gewerkeText += '</ul>';
+        }
+
+        entry.innerHTML = `
+            <h3>${einsatzArt} - ${einsatzDatum}</h3>
+            <p><strong>Zeitraum:</strong> ${einsatzStartzeit} - ${einsatzEndzeit}</p>
+            <p><strong>Einsatzleiter:</strong> ${einsatzLeiter}</p>
+            <p><strong>Beschreibung:</strong> ${einsatzBeschreibung}</p>
+            <p><strong>Einsatzfahrzeuge:</strong> ${einsatzFahrzeuge.join(', ')}</p>
+            <p><strong>Stärke:</strong> 1:${einsatzKraefte}</p>
+            ${gewerkeText}
+        `;
+
+        reportSection.appendChild(entry);
+
+        // Felder und Gewerke zurücksetzen
+        document.getElementById('einsatzArt').value = 'Hilfeleistung H0';
+        document.getElementById('einsatzDatum').value = '';
+        document.getElementById('einsatzStartzeit').value = '';
+        document.getElementById('einsatzEndzeit').value = '';
+        document.getElementById('einsatzLeiter').value = '';
+        document.getElementById('einsatzBeschreibung').value = '';
+        document.getElementById('einsatzFahrzeuge').selectedIndex = -1;
+        document.getElementById('einsatzKraefte').value = '';
+        gewerke = [];
+        document.getElementById('gewerkeList').innerHTML = '';
+    }
+
+    function exportPDF() {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        const reportSection = document.getElementById('reportSection');
+
+        html2canvas(reportSection).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 190; // in mm
+            const pageHeight = 295; // in mm
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+
+            let position = 10;
+
+            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            pdf.save('Einsatzbericht.pdf');
+        });
+    }
+</script>
+
+</body>
+</html>
