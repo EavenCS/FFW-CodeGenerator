@@ -1,0 +1,68 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-section input, .form-section select, .form-section textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-section button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-section button:hover {
+    background-color: #45a049;
+}
+
+.report-section {
+    margin-top: 20px;
+}
+
+.report-entry {
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.report-entry h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.report-entry p {
+    margin: 5px 0;
+}
+
+footer {
+    margin-top: 40px;
+    text-align: center;
+}
+
+footer a {
+    color: #333;
+    text-decoration: none;
+    font-size: 24px;
+}
+
+footer a:hover {
+    color: #000;
+}
